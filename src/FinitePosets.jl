@@ -231,7 +231,7 @@ showpic,
 transitive_closure`
 for more information
 """
-module Posets 
+module FinitePosets 
 # this module has only one dependency.
 using Combinat: collectby, combinations, tally, partitions, dominates 
 export CPoset, Poset,

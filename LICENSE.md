@@ -1,4 +1,4 @@
-The Posets.jl package is licensed under the MIT "Expat" License:
+The FinitePosets.jl package is licensed under the MIT "Expat" License:
 
     Copyright (c) 2021: Jean Michel
 
