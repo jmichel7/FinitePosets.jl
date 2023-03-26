@@ -1,13 +1,13 @@
 """
 This  package deals with  finite posets. 
 
-There  are two kinds of  posets. A "canonical poset"  or `CPoset` is on the
+There  are two types of  posets. A "canonical poset"  or `CPoset` is on the
 elements  `1:n`  where  `n=length(P)`.  A  `Poset`  is  on  a given list of
-elements  which may be of any type. A `Poset` contains internally a`CPoset`
-working  on  the  indices  of  the  elements,  which is more efficient than
-working  with  the  elements  themselves.  Similarly  for  efficiency  many
-functions  work with the  `CPoset` by transformeing  their input to indices
-and their output to elements.
+elements  which can be of any type. A `Poset` internally contains a`CPoset`
+which  works on the indices  of the elements, which  is more efficient than
+working  with the elements themselves.  For efficiency, many functions work
+on  the internal `CPoset` by transforming  their input to indices and their
+output to elements.
 
 A  `CPoset` has the field:
 
@@ -59,7 +59,7 @@ A  convenient  constructor  for  `Poset`s  takes  a  function  representing
 `isless`  for the poset and  the list of elements  and constructs the poset
 from  the incidence matrix, computed by  applying the function to each pair
 of  elements. For `isless` one can  give either a function implementing `<`
-or a function implementing `≤` (it is `or`-ed with `=` in any case).
+or a function implementing `≤` (it is `or`-ed with `==` in any case).
 ```julia-repl
 julia> l=vec(collect(Iterators.product(1:2,1:2)))
 4-element Vector{Tuple{Int64, Int64}}:
@@ -101,10 +101,11 @@ Julia
 julia> print(P) 
 Poset(CPoset([[2, 3], [4], [4], Int64[]]),[(1, 1), (2, 1), (1, 2), (2, 2)])
 ```
-A poset can be specified by a list of tuples specifing order relations. The
-transitive  closure  of  these  relations  is computed, giving an incidence
-matrix  from which the  poset is built.  The elements of  the poset, if not
-specified separately, will be all the elements which appear in the tuples.
+A  poset can be specified  by a list of  tuples specifying order relations.
+The  transitive closure  of these  relations is  computed, resulting  in an
+incidence  matrix from which the poset  is constructed. The elements of the
+poset, if not specified separately, are all the elements that appear in the
+tuples.
 ```julia-repl
 julia> Poset([(:a,:b),(:c,:d)])
 a<b
@@ -208,6 +209,8 @@ Windows but I did not test it.
 see the on-line help on
 `⊕,
 ⊗, 
++,
+*,
 chains,
 chainpoly,
 covering_chains,
@@ -459,8 +462,7 @@ end
 `Poset(covers::Vector{Tuple{T,T}}) where T`
 
 creates a poset representing the transitive closure of the given relations.
-The  poset is on the elements which appear in the relations
-relations.
+The  poset is on the elements which appear in the relations.
 ```julia-repl
 julia> Poset([(:a,:b),(:d,:c)])
 a<b
@@ -476,6 +478,7 @@ end
 """
   - `CPoset(:chain,n)`  a chain on `1:n`
   - `CPoset(:antichain,n)`  an antichain on `1:n`
+  - `CPoset(:diamond,n)`  a diamond poset on `1:n`
 """
 CPoset(s::Symbol,arg...)=CPoset(Val(s),arg...)
 Poset(s::Symbol,arg...)=Poset(Val(s),arg...)
@@ -1205,7 +1208,8 @@ function chainpoly(P::CPoset)
 end
 
 """
-`height(P)` the height the `Poset` or `CPoset` (the longest length of a chain).
+`height(P)`  the height of the `Poset` or `CPoset` (the longest length of a
+chain).
 """
 height(P::CPoset)=maximum(length.(maximal_chains(P)))
 end
