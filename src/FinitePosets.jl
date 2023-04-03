@@ -323,7 +323,13 @@ julia> hasse(m)
  []
 ```
 """
-hasse(m::Matrix{Bool})=map(x->filter(y->x[y]==2,1:length(x)),eachrow(m*m))
+function hasse(m::AbstractMatrix{Bool})
+  map(axes(m,1))do i
+    filter(axes(m,2)) do j
+@inbounds i!=j && m[i,j] && all(k->k==i || k==j || !m[i,k] || !m[k,j],axes(m,2))
+    end
+  end
+end
 
 abstract type AbstractPoset{T} end
 
@@ -887,7 +893,7 @@ function checkl(ord::AbstractMatrix{Bool})
     if !ord[j,i] || ord[i,j]
       @views l=ord[i,:].&ord[j,:]
       if !(l in subl)
-        if !any(y->l==l.&y,eachrow(ord[l,:]))
+        if all(y->l!=(l.&y),eachrow(ord[l,:]))
           for k in (1:n)[l]
             ll=copy(ord[k,:])
             ll[k]=false
@@ -967,10 +973,10 @@ julia> moebius(p)
   0
 ```
 """
-function moebius(P::CPoset,y=0)
+function moebius(P::CPoset,y::Integer=0)
   o=linear_extension(P)
   if y==0 y=length(o)
-  else y=findfirst(==(y),o)
+  else y=findfirst(==(y),o)::Int
   end
   mu=zeros(Int,length(P))
   mu[o[y]]=1

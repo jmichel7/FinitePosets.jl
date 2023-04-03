@@ -2,11 +2,14 @@ name = "FinitePosets"
 uuid = "580d1d9c-67b1-4c59-872e-f12456ffb9fa"
 authors = ["Jean Michel <jean.michel@imj-prg.fr>"]
 version = "0.1.0"
-[compat]
-julia = "1"
-Combinat = "0.0.3, 0.0.4, 0.0.5, 0.0.6"
+
 [deps]
 Combinat = "a6b051d1-fc4b-4ede-b53e-347fa9fb9a74"
+
+[compat]
+Combinat = "0.0.3, 0.0.4, 0.0.5, 0.0.6"
+julia = "1"
+
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
