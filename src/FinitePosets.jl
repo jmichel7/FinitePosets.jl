@@ -200,11 +200,10 @@ julia> P1*P1
 julia> P1⊗ P1 # the ordinal product
 (1, 1)<(1, 2)<(1, 3)<(2, 1)<(2, 2)<(2, 3)<(3, 1)<(3, 2)<(3, 3)
 ```
-
 Finally `showpic(p)` where `p` is a `CPoset` or a `Poset` gives a graphical
-display of the poset (on Linux) provided you have the command `dot` and the
-command  `display` of  `imagemagick` installed.  It may  work on  MacOs and
-Windows but I did not test it.
+display  of the  poset (on  Linux) provided  you have  the command `dot` of
+`graphviz`  and the  command `display`  of `imagemagick`  installed. It may
+work on MacOs and Windows but I did not test it.
 
 see the on-line help on
 `⊕,
