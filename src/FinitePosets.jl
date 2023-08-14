@@ -9,13 +9,14 @@ working  with the elements themselves.  For efficiency, many functions work
 on  the internal `CPoset` by transforming  their input to indices and their
 output to elements.
 
-A  `CPoset` has the field:
+A  `CPoset` `p` contains one of the following data:
 
-  - `hasse`:  a list representing  the Hasse diagram  of the poset: the `i`-th  entry is the list of elements which cover (are immediate  successors of) `i`, that  is the list of `j` such that `i<j` and there is no `k` such that `i<k<j`.
+  - `hasse(p)`:  a list representing  the Hasse diagram  of the poset: the `i`-th  entry is the list of elements which cover (are immediate  successors of) `i`, that  is the list of `j` such that `i<j` and there is no `k` such that `i<k<j`.
 
-The following is cached when computed to speed up subsequent computations:
+  - `incidence(p)`: a  boolean matrix  such that `incidence[i,j]==true` iff `i<=j`. This is sometimes called the ζ-matrix of the poset.
 
-  - `incidence`: a  boolean matrix  such that `incidence[i,j]==true` iff `i<=j`. This is sometimes called the ζ-matrix of the poset.
+If missing, one of the above data is computed from the other. This may take
+some substantial time for large posets.
 
 There are several ways of defining a poset.  By entering the Hasse diagram:
 ```julia-repl
@@ -333,7 +334,6 @@ end
 abstract type AbstractPoset{T} end
 
 struct CPoset<:AbstractPoset{Int}
-  hasse::Vector{Vector{Int}}
   prop::Dict{Symbol,Any}
 end
 
@@ -344,7 +344,7 @@ Base.haskey(o::CPoset,s::Symbol)=haskey(getfield(o,:prop),s)
 Base.get!(f::Function,o::CPoset,s::Symbol)=get!(f,getfield(o,:prop),s)
 Base.delete!(p::CPoset,s::Symbol)=delete!(p.prop,s)
 
-Base.length(p::AbstractPoset)=length(hasse(p))
+Base.length(p::AbstractPoset)=haskey(p,:hasse) ? length(hasse(p)) : size(incidence(p),1)
 
 Base.eltype(p::AbstractPoset{T}) where T=T
 
@@ -396,7 +396,7 @@ julia> CPoset(Bool[1 1 1 1 1;0 1 0 1 1;0 0 1 1 1;0 0 0 1 0;0 0 0 0 1])
 1<2,3<4,5
 ```
 """
-CPoset(m::Matrix{Bool})=CPoset(hasse(m),Dict{Symbol,Any}(:incidence=>m))
+CPoset(m::Matrix{Bool})=CPoset(Dict{Symbol,Any}(:incidence=>m))
 
 """
 `CPoset(h::Vector{<:Vector{<:Integer}})`
@@ -410,7 +410,7 @@ julia> CPoset([[2,3],[4,5],[4,5],Int[],Int[]])
 1<2,3<4,5
 ```
 """
-CPoset(h::Vector{<:Vector{<:Integer}})=CPoset(h,Dict{Symbol,Any}())
+CPoset(h::Vector{<:Vector{<:Integer}})=CPoset(Dict{Symbol,Any}(:hasse=>h))
 
 """
 `Poset(f::Function,e::AbstractVector)`
@@ -575,23 +575,43 @@ julia> linear_extension(p)
 ```
 `linear_extension(P::Poset)` returns a linear extension of `P.C`.
 """
-function linear_extension(P::CPoset)::Vector{Int}
+function linear_extension(P::CPoset)
   get!(P,:linear_extension)do
-    n=zeros(length(P))
-    for v in hasse(P), x in v n[x]+=1 end
-    Q=filter(x->iszero(n[x]),1:length(n))
-    res=Int[]
-    while !isempty(Q)
-      i=popfirst!(Q)
-      push!(res, i)
-      for x in hasse(P)[i]
-        n[x]-=1
-        if iszero(n[x]) push!(Q, x) end
+    if haskey(P,:hasse) linear_extension(hasse(P))
+    else linear_extension(incidence(P))
+    end
+  end::Vector{Int}
+end
+
+function linear_extension(H::Vector{Vector{Int}})
+  n=zeros(length(H))
+  for v in H, x in v n[x]+=1 end
+  Q=filter(x->iszero(n[x]),1:length(n))
+  res=Int[]
+  while !isempty(Q)
+    i=popfirst!(Q)
+    push!(res, i)
+    for x in H[i]
+      n[x]-=1
+      if iszero(n[x]) push!(Q, x) end
+    end
+  end
+  if !iszero(n) error("cycle") end
+  res
+end
+
+function linear_extension(m::Matrix{Bool})
+  res=Int[]
+  t=trues(size(m,1))
+  while length(res)<size(m,1)
+    for i in eachindex(t)
+      if t[i] && count(j->m[i,j] && t[j],eachindex(t))==1
+        t[i]=false
+        pushfirst!(res,i)
       end
     end
-    if !iszero(n) error("cycle") end
-    res
-   end::Vector{Int}
+  end
+  res
 end
 
 """
@@ -614,7 +634,11 @@ julia> hasse(p)
 ```
 `hasse(P::Poset)` returns `hasse(P.C)`.
 """
-hasse(p::CPoset)=p.hasse
+function hasse(p::CPoset)
+  get!(p,:hasse)do
+    hasse(incidence(p))
+  end::Vector{Vector{Int}}
+end
 
 """
 `incidence(P::CPoset)`
