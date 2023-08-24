@@ -15,8 +15,10 @@ A  `CPoset` `p` contains one of the following data:
 
   - `incidence(p)`: a  boolean matrix  such that `incidence[i,j]==true` iff `i<=j`. This is sometimes called the ζ-matrix of the poset.
 
-If missing, one of the above data is computed from the other. This may take
-some substantial time for large posets.
+Some  computations work better on the  incidence matrix, and some others on
+the  Hasse diagram. If missing for a  computation, one of the above data is
+computed  from the  other. This  may take  some substantial  time for large
+posets.
 
 There are several ways of defining a poset.  By entering the Hasse diagram:
 ```julia-repl
@@ -45,7 +47,6 @@ julia> linear_extension(p) # a total order compatible with p
  3
  4
 ```
-
 A `Poset` is constructed from a `CPoset` and a list of elements
 
 ```julia-repl
@@ -326,7 +327,7 @@ julia> hasse(m)
 function hasse(m::AbstractMatrix{Bool})
   map(axes(m,1))do i
     filter(axes(m,2)) do j
-@inbounds i!=j && m[i,j] && all(k->k==i || k==j || !m[i,k] || !m[k,j],axes(m,2))
+      i!=j && m[i,j] && all(k->k==i || k==j || !m[i,k] || !m[k,j],axes(m,2))
     end
   end
 end
@@ -337,14 +338,13 @@ struct CPoset<:AbstractPoset{Int}
   prop::Dict{Symbol,Any}
 end
 
-Base.getproperty(o::CPoset,s::Symbol)=hasfield(CPoset,s) ? getfield(o,s) : 
-         getfield(o,:prop)[s]
+Base.getproperty(o::CPoset,s::Symbol)= s==:prop ? getfield(o,s) : o.prop[s]
 Base.setproperty!(o::CPoset,s::Symbol,v)=getfield(o,:prop)[s]=v
 Base.haskey(o::CPoset,s::Symbol)=haskey(getfield(o,:prop),s)
 Base.get!(f::Function,o::CPoset,s::Symbol)=get!(f,getfield(o,:prop),s)
 Base.delete!(p::CPoset,s::Symbol)=delete!(p.prop,s)
 
-Base.length(p::AbstractPoset)=haskey(p,:hasse) ? length(hasse(p)) : size(incidence(p),1)
+Base.length(p::CPoset)=haskey(p,:hasse) ? length(hasse(p)) : size(incidence(p),1)
 
 Base.eltype(p::AbstractPoset{T}) where T=T
 
@@ -375,16 +375,19 @@ Poset(p::CPoset,e::AbstractVector{T}) where T=Poset(p,e isa Vector ? e : collect
 Poset(P::CPoset)=Poset(P,1:length(P))
 CPoset(P::Poset)=P.C
 
-hasse(P::Poset)=hasse(P.C)
-linear_extension(P::Poset)=linear_extension(P.C)
-incidence(P::Poset)=incidence(P.C)
-partition(P::Poset)=partition(P.C)
-moebiusmatrix(P::Poset)=moebiusmatrix(P.C)
-coxetermatrix(P::Poset)=coxetermatrix(P.C)
+Base.length(P::Poset)=length(P.C)
 chainpoly(P::Poset)=chainpoly(P.C)
+covers(P::Poset)=covers(P.C)
+coxetermatrix(P::Poset)=coxetermatrix(P.C)
+hasse(P::Poset)=hasse(P.C)
 height(P::Poset)=height(P.C)
+incidence(P::Poset)=incidence(P.C)
 isjoinlattice(P::Poset)=isjoinlattice(P.C)
 ismeetlattice(P::Poset)=ismeetlattice(P.C)
+linear_extension(P::Poset)=linear_extension(P.C)
+moebiusmatrix(P::Poset)=moebiusmatrix(P.C)
+partition(P::Poset)=partition(P.C)
+
 """
 `CPoset(m::Matrix{Bool})`
 
@@ -455,7 +458,7 @@ julia> CPoset([(6,2),(5,1)])
 ```
 """
 function CPoset(covers::Vector{Tuple{Int,Int}})
-  n=maximum(maximum.(covers))
+  n=isempty(covers) ? 0 : maximum(maximum.(covers))
   inc=zeros(Bool,n,n)
   for i in 1:n inc[i,i]=true end
   for (i,j) in covers inc[i,j]=true end
@@ -721,7 +724,7 @@ Base.:*(P::CPoset,Q::CPoset)=CPoset(kron(incidence(P),incidence(Q)))
 Base.:*(P::Poset,Q::Poset)=Poset(P.C*Q.C,
                 vec(collect(Iterators.product(P.elements,Q.elements))))
 
-covers(P::CPoset)=vcat([map(j->(i,j),s) for (i,s) in enumerate(hasse(P))]...)
+covers(P::CPoset)=[(i,j) for (i,s) in enumerate(hasse(P)) for j in s]
 
 """
 `dot(p)` gives a rendering of the Hasse diagram of the
@@ -737,8 +740,7 @@ function dot(P::AbstractPoset)
   res="digraph {\n"
   for i in 1:length(P) res*="\""*q(i)*"\";" end
   res*="\n"
-  c= P isa CPoset ? covers(P) : covers(P.C)
-  for (i,j) in c res*="\""*q(j)*"\"->\""*q(i)*"\"[dir=back];" end
+  for (i,j) in covers(P) res*="\""*q(j)*"\"->\""*q(i)*"\"[dir=back];" end
   res*"\n}"
 end
 
@@ -815,6 +817,14 @@ function covering_chains(P::CPoset)
   ch
 end
 
+function pdual(h::Vector{Vector{Int}})
+  res=empty.(h)
+  for i in eachindex(h), j in h[i] push!(res[j], i) end
+  res
+end
+
+pdual(m::Matrix{Bool})=permutedims(m)
+
 """
 `dual(P)`
 
@@ -829,15 +839,13 @@ julia> dual(p)
 ```
 """
 function dual(p::CPoset)
-  h=hasse(p)
-  resh=map(empty,h)
-  for i in 1:length(p), j in h[i] push!(resh[j], i) end
-  res=CPoset(resh)
-  if haskey(p,:incidence) res.incidence=permutedims(incidence(p)) end
-  return res
+  res=CPoset(Dict{Symbol,Any}())
+  if haskey(p,:hasse) res.hasse=pdual(hasse(p)) end
+  if haskey(p,:incidence) res.incidence=pdual(incidence(p)) end
+  res
 end
 
-dual(p::Poset)=Poset(dual(p.C),p.elements)
+dual(p::Poset)=Poset(dual(p.C),p.elements,copy(p.prop))
 
 """
 `partition(P::CPoset)`
@@ -896,8 +904,10 @@ function induced(p::CPoset,ind::AbstractVector{<:Integer})
     if haskey(p, :incidence) res.incidence=incidence(p)[ind,ind] end
   else
     inc=incidence(p)
-    inc=[i!=j && ind[i]==ind[j] ? false : inc[ind[i],ind[j]]
+    if !isempty(inc)
+       inc=[i!=j && ind[i]==ind[j] ? false : inc[ind[i],ind[j]]
                for i in eachindex(ind), j in eachindex(ind)]
+    end
     res=CPoset(hasse(inc))
     res.incidence=inc
   end
@@ -1002,13 +1012,15 @@ function moebius(P::CPoset,y::Integer=0)
   else y=findfirst(==(y),o)::Int
   end
   mu=zeros(Int,length(P))
-  mu[o[y]]=1
-  I=incidence(P)
-  for i in y-1:-1:1 
-    mu[o[i]]=0
-    for j in i+1:y
-      if I[o[i],o[j]]
-        mu[o[i]]-=mu[o[j]]
+  if !isempty(mu)
+    mu[o[y]]=1
+    I=incidence(P)
+    for i in y-1:-1:1 
+      mu[o[i]]=0
+      for j in i+1:y
+        if I[o[i],o[j]]
+          mu[o[i]]-=mu[o[j]]
+        end
       end
     end
   end
@@ -1177,20 +1189,20 @@ function maximal_chains(P::CPoset)
   get!(P,:maxchains)do
     p=hasse(P)
     function mc(o)local res, i, f
-      f=o[1]
-      if isempty(o) return Int[] 
-      elseif length(o)==1 return [[f]]
+      if isempty(o) return Vector{Int}[] 
+      elseif length(o)==1 return [[o[1]]]
       end
+      f=o[1]
       res=filter(x->!(x[1] in p[f]),mc(o[2:end]))
-      if isempty(p[f]) return vcat([[f]],res) end
+      if isempty(p[f]) return pushfirst!(res,[f]) end
       for i in p[f] 
-        append!(res,map(c->vcat([f],c),
+        append!(res,map(c->pushfirst!(c,f),
                         filter(x->x[1]==i,mc(o[findfirst(==(i),o):end]))))
       end
       res
     end
     mc(linear_extension(P))
-  end
+  end::Vector{Vector{Int}}
 end
 
 maximal_chains(P::Poset)=map(x->P.elements[x],maximal_chains(P.C))

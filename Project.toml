@@ -1,7 +1,7 @@
 name = "FinitePosets"
 uuid = "580d1d9c-67b1-4c59-872e-f12456ffb9fa"
 authors = ["Jean Michel <jean.michel@imj-prg.fr>"]
-version = "0.1.1"
+version = "0.1.2"
 
 [deps]
 Combinat = "a6b051d1-fc4b-4ede-b53e-347fa9fb9a74"
