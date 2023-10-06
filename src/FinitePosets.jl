@@ -203,9 +203,9 @@ julia> P1⊗ P1 # the ordinal product
 (1, 1)<(1, 2)<(1, 3)<(2, 1)<(2, 2)<(2, 3)<(3, 1)<(3, 2)<(3, 3)
 ```
 Finally `showpic(p)` where `p` is a `CPoset` or a `Poset` gives a graphical
-display  of the  poset (on  Linux) provided  you have  the command `dot` of
-`graphviz`  and the  command `display`  of `imagemagick`  installed. It may
-work on MacOs and Windows but I did not test it.
+display  of the  poset provided  you have  the command  `dot` of `graphviz`
+installed. It then uses the xdg "open" command to open the resulting `.png`
+file. This works on Linux and MacOs but I could not try it on Windows.
 
 see the on-line help on
 `⊕,
@@ -746,12 +746,28 @@ end
 
 """
 `showpic(p)` display a graphical representation of the Hasse diagram of the
-`Poset` or `CPoset` using the commands `dot` and `display`.
+`Poset` or `CPoset` using the commands `dot` and `open`.
 """
 function showpic(P::AbstractPoset)
-  open(pipeline(`dot -Tpng`,`display`),"w")do f
-    print(f,dot(P))
+# the simple version below does not work on MacOS?
+# open(pipeline(`dot -Tpng`,`open`),"w")do f
+#   print(f,dot(P))
+# end
+  n=tempname()
+  open("$n.dot","w")do file
+    write(file,dot(P))
   end
+  run(pipeline(`dot -Tpng $n.dot`, stdout=n*".png"))
+  run(`open $n.png`)
+end
+
+function showpic2(P::AbstractPoset)
+  n=tempname()
+  open("$n.dot","w")do file
+    write(file,FinitePosets.dot(P))
+  end
+  run(pipeline(`dot -Tpng $n.dot`, stdout=n*".png"))
+  run(`display $n.png`)
 end
 
 """
