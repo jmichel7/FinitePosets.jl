@@ -730,9 +730,9 @@ covers(P::CPoset)=[(i,j) for (i,s) in enumerate(hasse(P)) for j in s]
 `dot(p)` gives a rendering of the Hasse diagram of the
 `Poset` or `CPoset` in the graphical language `dot`.
 """
-function dot(P::AbstractPoset)
+function dot(P::AbstractPoset;opt...)
   if P isa CPoset q=string
-  else  io=IOContext(stdout,:limit=>true)
+  else  io=IOContext(stdout,:limit=>true,opt...)
     q(i)=haskey(P,:show_element) ? 
     sprint(P.show_element,P,i;context=io) :
     sprint(show,P.elements[i];context=io)
@@ -745,17 +745,19 @@ function dot(P::AbstractPoset)
 end
 
 """
-`showpic(p)` display a graphical representation of the Hasse diagram of the
-`Poset` or `CPoset` using the commands `dot` and `open`.
+`showpic(p;opt...)` display a graphical representation of the Hasse diagram
+of  the `Poset` or `CPoset` using the  commands `dot` and `open`. If `p isa
+Poset` it is possible to give as keyword aguments a list of `IO` properties
+which will be forwarded to the `show_element` method of `p`.
 """
-function showpic(P::AbstractPoset)
+function showpic(P::AbstractPoset;opt...)
 # the simple version below does not work on MacOS?
 # open(pipeline(`dot -Tpng`,`open`),"w")do f
 #   print(f,dot(P))
 # end
   n=tempname()
   open("$n.dot","w")do file
-    write(file,dot(P))
+    write(file,dot(P;opt...))
   end
   run(pipeline(`dot -Tpng $n.dot`, stdout=n*".png"))
   run(`open $n.png`)
