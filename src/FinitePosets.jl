@@ -237,7 +237,8 @@ for more information
 """
 module FinitePosets 
 # this module has only one dependency.
-using Combinat: collectby, combinations, tally, partitions, dominates 
+using Combinat: Combinat, collectby, combinations, tally, partitions, dominates 
+import Combinat: moebius
 export CPoset, Poset,
 ⊕,
 ⊗, 
@@ -257,11 +258,11 @@ linear_extension,
 maxima,
 maximal_chains, 
 minima,
-moebius, 
 moebiusmatrix, 
 partition, 
 showpic,
-transitive_closure
+transitive_closure,
+moebius
 
 """
 `transitive_closure(M)`
@@ -1024,7 +1025,7 @@ julia> moebius(p)
   0
 ```
 """
-function moebius(P::CPoset,y::Integer=0)
+function Combinat.moebius(P::CPoset,y::Integer=0)
   o=linear_extension(P)
   if y==0 y=length(o)
   else y=findfirst(==(y),o)::Int
@@ -1044,7 +1045,7 @@ function moebius(P::CPoset,y::Integer=0)
   end
   mu
 end
-moebius(P::Poset,y=0)=moebius(P.C,y)
+Combinat.moebius(P::Poset,y=0)=moebius(P.C,y)
 
 function unitriangularinv(b::Matrix)
   a=Int.(b)
