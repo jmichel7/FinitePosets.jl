@@ -16,18 +16,19 @@ A  `CPoset` `p` contains one of the following data:
   - `incidence(p)`: a  boolean matrix  such that `incidence[i,j]==true` iff `i<=j`. This is sometimes called the ζ-matrix of the poset.
 
 Some  computations work better on the  incidence matrix, and some others on
-the  Hasse diagram. If missing for a  computation, one of the above data is
-computed  from the  other. This  may take  some substantial  time for large
-posets.
+the  Hasse diagram.  If needed  for a  computation and  missing, one of the
+above  data is computed from the other. This may take some substantial time
+for large posets.
 
-There are several ways of defining a poset.  By entering the Hasse diagram:
+There  are several ways of defining a  poset. One way is entering the Hasse
+diagram:
 ```julia-repl
 julia> p=CPoset([[2,3],[4],[4],Int[]])
 1<2,3<4
 ```
-As  seen above, `p` is shown as a list of covering maximal chains; elements
-which  are  equivalent  for  the  poset  are  printed together separated by
-commas.
+As  seen above,  `p` is  displayed as  a list  of covering  maximal chains;
+elements  which are equivalent for the poset are printed together separated
+by commas.
 
 ```julia-repl
 julia> length(p) # the number of elements of `p`
@@ -61,7 +62,7 @@ A  convenient  constructor  for  `Poset`s  takes  a  function  representing
 `isless`  for the poset and  the list of elements  and constructs the poset
 from  the incidence matrix, computed by  applying the function to each pair
 of  elements. For `isless` one can  give either a function implementing `<`
-or a function implementing `≤` (it is `or`-ed with `==` in any case).
+or a function implementing `≤` (it is `and`-ed with `!=` in any case).
 ```julia-repl
 julia> l=vec(collect(Iterators.product(1:2,1:2)))
 4-element Vector{Tuple{Int64, Int64}}:
@@ -260,6 +261,7 @@ maximal_chains,
 minima,
 moebiusmatrix, 
 partition, 
+ranking,
 showpic,
 transitive_closure,
 moebius
@@ -1272,4 +1274,53 @@ end
 chain).
 """
 height(P::CPoset)=maximum(length.(maximal_chains(P)))
+
+"""
+`ranking(P)`
+
+here `P` is a `Poset` or a `CPoset`. A poset is ranked if the recipe
+
+`ρ(x)=0` if `x∈minima(P)`, `ρ(y)=ρ(x)+1` if `y` is an immediate successor of `x`
+
+gives a well-defined function `ρ`. Then `ρ` is called a ranking of `P`. The
+function  `ranking` returns the  vector of `ρ(x)`  for `x` running over the
+elements of `P` if `P` has a ranking, and `nothing` otherwise.
+
+A  poset  `P`  is  graded  if  all  maximal chains have the same length, or
+equivalently `P` is ranked and `allequal(ranking(P)[maxima(P)])`.
+```julia-repl
+julia> ranking(Poset(:partitionsdominance,6))
+11-element Vector{Int64}:
+ 0
+ 1
+ 2
+ 3
+ 3
+ 4
+ 5
+ 5
+ 6
+ 7
+ 8
+
+julia> ranking(Poset(:partitionsdominance,7)) # not ranked
+
+```
+"""
+function ranking(P::CPoset)
+  get!(P,:ranking)do
+    ranking=fill(0,length(P))
+    h=hasse(P)
+    tograde=minima(P)
+    while !isempty(tograde)
+      m=pop!(tograde)
+      if any(x->!(ranking[x] in (0,ranking[m]+1)),h[m]) return nothing end
+      ranking[h[m]].=ranking[m]+1
+      append!(tograde,h[m])
+    end
+    ranking
+  end::Union{Nothing,Vector{Int}}
+end
+
+ranking(P::Poset)=ranking(P.C)
 end

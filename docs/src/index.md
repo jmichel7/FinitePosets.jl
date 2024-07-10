@@ -23,6 +23,7 @@ maximal_chains
 chains
 height
 chainpoly
+ranking
 moebius
 moebiusmatrix
 coxetermatrix
