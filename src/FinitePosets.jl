@@ -625,17 +625,48 @@ function linear_extension(m::Matrix{Bool})
   res
 end
 
-function linear_extensions(m::Matrix{Bool},E=axes(m,1))
-  if length(E)==1 return [E] end
-  res=Vector{Int}[]
-  for i in findall(i->count(@view m[E,i])==1,E)
-    for x in linear_extensions(m,deleteat!(collect(E),i))
-      push!(res,pushfirst!(x,E[i]))
-    end
+function rand_linear_extension(m::Matrix{Bool})
+  res=Int[]
+  t=trues(size(m,1))
+  while length(res)<size(m,1)
+   i=rand(findall(i->t[i] && count(j->m[i,j] && t[j],eachindex(t))==1,eachindex(t)))
+    t[i]=false
+    pushfirst!(res,i)
   end
   res
 end
 
+function linear_extensions(m::Matrix{Bool},E=trues(size(m,1)),res=[Int.(E)],c=size(m,1))
+  first=true
+  for i in axes(m,1)
+    if !E[i] continue end
+    if c==1 res[end][end]=i;break end
+    if count(j->E[j] && m[j,i],axes(m,1))!=1 continue end
+    if !first push!(res,copy(res[end])) end
+    first=false
+    res[end][size(m,1)-c+1]=i
+    E[i]=false
+    linear_extensions(m,E,res,c-1)
+    E[i]=true
+  end
+  res
+end
+
+function nlinear_extensions(m::Matrix{Bool},E=trues(size(m,1)),c=size(m,1))
+  if c==1 return 1 end
+  first=true
+  res=0
+  for i in axes(m,1)
+    if !E[i] continue end
+    if count(j->E[j] && m[j,i],axes(m,1))!=1 continue end
+    first=false
+    E[i]=false
+    res+=nlinear_extensions(m,E,c-1)
+    E[i]=true
+    if res>10^7 error("poset has more than 10 million linear extensions") end
+  end
+  res
+end
 """
 `linear_extensions(P::CPoset)`
 
@@ -839,7 +870,7 @@ end
 
 """
 `coxeter_matrix(p)` the Coxeter matrix of the `Poset` or `CPoset`, defined
-as `-m*transpose(inv(m))` where `m` is the ζ or incidence matrix.
+as `-inv(m)*transpose(m)` where `m` is the ζ or incidence matrix.
 ```julia-repl
 julia> coxeter_matrix(CPoset(:diamond,5))
 5×5 Matrix{Int64}:
@@ -850,7 +881,7 @@ julia> coxeter_matrix(CPoset(:diamond,5))
  -1  -1  -1  -1  -1
 ```
 """
-coxeter_matrix(p::CPoset,o=linear_extension(p))=-moebiusmatrix(p,o)*transpose(incidence(p))
+coxeter_matrix(p::CPoset)=-moebiusmatrix(p)*transpose(incidence(p))
 
 """
 `covering_chains(P::CPoset)`
@@ -1111,7 +1142,8 @@ julia> moebiusmatrix(CPoset(:diamond,5))
 ```
 `moebiusmatrix(P::Poset)` returns `moebiusmatrix(P.C)`
 "
-function moebiusmatrix(P::CPoset,o=linear_extension(P))
+function moebiusmatrix(P::CPoset)
+  o=linear_extension(P)
   r=invUnitUpperTriangular(incidence(P)[o,o])
   o=invperm(o)
   r[o,o]
