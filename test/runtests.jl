@@ -1,25 +1,17 @@
 # auto-generated tests from julia-repl docstrings
 using Test, FinitePosets
-function mytest(file::String,src::String,man::String)
-  println(file," ",src)
-  omit=src[end]==';'
-  src=replace(src,"\\\\"=>"\\")
-  exec=repr(MIME("text/plain"),eval(Meta.parse(src)),context=:limit=>true)
-  if omit exec="nothing" end
-  exec=replace(exec,r" *(\n|$)"s=>s"\1")
-  exec=replace(exec,r"\n$"s=>"")
-  man=replace(man,r" *(\n|$)"s=>s"\1")
-  man=replace(man,r"\n$"s=>"")
-  i=1
-  while i<=lastindex(exec) && i<=lastindex(man) && exec[i]==man[i]
-    i=nextind(exec,i)
-  end
-  if exec!=man 
-    print("exec=$(repr(exec[i:end]))\nmanl=$(repr(man[i:end]))\n")
-  end
-  exec==man
+function mytest(file::String,cmd::String,man::String)
+  println(file," ",cmd)
+  exec=repr(MIME("text/plain"),eval(Meta.parse(cmd)),context=:limit=>true)
+  if endswith(cmd,";") return true end
+  exec=replace(exec,r"\s*$"m=>""); exec=replace(exec,r"\s*$"s=>"")
+  exec=replace(exec,r"^\s*"=>"")
+  if exec==man return true end
+  inds=collect(eachindex(exec))
+  i=inds[findfirst(i->i<=lastindex(man) && exec[i]!=man[i],inds)]
+  print("exec=$(repr(exec[i:end]))\nmanl=$(repr(man[i:end]))\n")
+  false
 end
-@testset verbose = true "Gapjm" begin
 @testset "FinitePosets.jl" begin
 @test mytest("FinitePosets.jl","p=CPoset([[2,3],[4],[4],Int[]])","1<2,3<4")
 @test mytest("FinitePosets.jl","length(p)","4")
@@ -71,6 +63,8 @@ end
 @test mytest("FinitePosets.jl","Poset(:partitionsdominance,5)","[1, 1, 1, 1, 1]<[2, 1, 1, 1]<[2, 2, 1]<[3, 1, 1]<[3, 2]<[4, 1]<[5]")
 @test mytest("FinitePosets.jl","p=CPoset((i,j)->j%i==0,6)","1<5\n1<2<4\n1<3<6\n2<6")
 @test mytest("FinitePosets.jl","linear_extension(p)","6-element Vector{Int64}:\n 1\n 2\n 3\n 5\n 4\n 6")
+@test mytest("FinitePosets.jl","p=CPoset((i,j)->j%i==0,4)","1<3\n1<2<4")
+@test mytest("FinitePosets.jl","linear_extensions(p)","3-element Vector{Vector{Int64}}:\n [1, 2, 3, 4]\n [1, 2, 4, 3]\n [1, 3, 2, 4]")
 @test mytest("FinitePosets.jl","p=CPoset((i,j)->j%i==0,5)","1<3,5\n1<2<4")
 @test mytest("FinitePosets.jl","hasse(p)","5-element Vector{Vector{Int64}}:\n [2, 3, 5]\n [4]\n []\n []\n []")
 @test mytest("FinitePosets.jl","p=CPoset([i==6 ? Int[] : [i+1] for i in 1:6])","1<2<3<4<5<6")
@@ -95,11 +89,15 @@ end
 @test mytest("FinitePosets.jl","isjoinlattice(p)","false")
 @test mytest("FinitePosets.jl","p=CPoset((i,j)->j%i==0,8)","1<5,7\n1<2<4<8\n1<3<6\n2<6")
 @test mytest("FinitePosets.jl","ismeetlattice(p)","true")
+@test mytest("FinitePosets.jl","p=CPoset((i,j)->i%j==0,8)","5,7<1\n6<2<1\n6<3<1\n8<4<2")
+@test mytest("FinitePosets.jl","moebius(p)","8-element Vector{Int64}:\n  1\n -1\n -1\n  0\n -1\n  1\n -1\n  0")
 @test mytest("FinitePosets.jl","moebiusmatrix(CPoset(:diamond,5))","5×5 Matrix{Int64}:\n 1  -1  -1  -1   2\n 0   1   0   0  -1\n 0   0   1   0  -1\n 0   0   0   1  -1\n 0   0   0   0   1")
 @test mytest("FinitePosets.jl","p=CPoset([[3],[3],[4,5],Int[],Int[]])","1,2<3<4,5")
 @test mytest("FinitePosets.jl","minima(p)","2-element Vector{Int64}:\n 1\n 2")
+@test mytest("FinitePosets.jl","minima(p,3:5)","1-element Vector{Int64}:\n 3")
 @test mytest("FinitePosets.jl","p=CPoset([[3],[3],[4,5],Int[],Int[]])","1,2<3<4,5")
 @test mytest("FinitePosets.jl","maxima(p)","2-element Vector{Int64}:\n 4\n 5")
+@test mytest("FinitePosets.jl","maxima(p,1:3)","1-element Vector{Int64}:\n 3")
 @test mytest("FinitePosets.jl","l=vec(collect(Iterators.product(1:2,1:2)))","4-element Vector{Tuple{Int64, Int64}}:\n (1, 1)\n (2, 1)\n (1, 2)\n (2, 2)")
 @test mytest("FinitePosets.jl","P=Poset((x,y)->all(map(<=,x,y)),l)","(1, 1)<(2, 1),(1, 2)<(2, 2)")
 @test mytest("FinitePosets.jl","interval(P,≤,(1,2))","2-element Vector{Tuple{Int64, Int64}}:\n (1, 1)\n (1, 2)")
@@ -113,5 +111,8 @@ end
 @test mytest("FinitePosets.jl","maximal_chains(p.C)","2-element Vector{Vector{Int64}}:\n [1, 2, 4]\n [1, 3, 4]")
 @test mytest("FinitePosets.jl","chains(CPoset(:chain,3))","8-element Vector{Vector{Int64}}:\n []\n [1]\n [2]\n [3]\n [1, 2]\n [1, 3]\n [2, 3]\n [1, 2, 3]")
 @test mytest("FinitePosets.jl","chainpoly(Poset(:powerset,3))","5-element Vector{Int64}:\n  1\n  8\n 19\n 18\n  6")
-end
+@test mytest("FinitePosets.jl","ranking(Poset(:partitionsdominance,6))","11-element Vector{Int64}:\n 0\n 1\n 2\n 3\n 3\n 4\n 5\n 5\n 6\n 7\n 8")
+@test mytest("FinitePosets.jl","ranking(Poset(:partitionsdominance,7))","nothing")
+@test mytest("FinitePosets.jl","p=CPoset((i,j)->j%i==0,4)","1<3\n1<2<4")
+@test mytest("FinitePosets.jl","FinitePosets.antichains(p)","7-element Vector{Vector{Int64}}:\n []\n [1]\n [2]\n [3]\n [4]\n [2, 3]\n [3, 4]")
 end

@@ -208,10 +208,10 @@ julia> P1⊗ P1 # the ordinal product
 
 Finally `showpic(p)` where `p` is a `CPoset` or a `Poset` gives a graphical display  of the  poset provided  you have  the command  `dot` of `graphviz` installed. It then uses the xdg "open" command to open the resulting `.png` file. This works on Linux and MacOs but I could not try it on Windows.
 
-see the on-line help on `⊕, ⊗,  +, *, chains, chainpoly, covering_chains, coxetermatrix,  dual,  hasse,  height, incidence,  induced,  interval,  isjoinlattice,  ismeetlattice,  linear_extension,  maxima, maximal_chains,  minima, moebius,  moebiusmatrix,  partition,  showpic, transitive_closure` for more information
+see the on-line help on `⊕, ⊗,  +, *, chains, chainpoly, covering_chains, coxetermatrix,  dual,  hasse,  height, incidence,  induced,  interval,  isjoinlattice,  ismeetlattice,  linear_extension,  linear_extensions,  maxima, maximal_chains,  antichains, minima, moebius,  moebiusmatrix,  partition,  showpic, transitive_closure` for more information
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1-L238' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1-L240' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.Poset' href='#FinitePosets.Poset'>#</a>
 **`FinitePosets.Poset`** &mdash; *Type*.
@@ -230,7 +230,7 @@ a<b,c<d
 with no second argument transforms a `CPoset` into a `Poset`.
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L367-L376' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L371-L380' class='documenter-source'>source</a><br>
 
 
 `Poset(f::Function,e::AbstractVector)`
@@ -245,7 +245,7 @@ julia> Poset((x,y)->all(x.≤y),vec(collect(Iterators.product(1:2,1:3))))
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L421-L432' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L426-L437' class='documenter-source'>source</a><br>
 
 
 `Poset(covers::Vector{Tuple{T,T}}) where T`
@@ -259,7 +259,7 @@ d<c
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L472-L482' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L477-L487' class='documenter-source'>source</a><br>
 
 
   * `Poset(:chain,e)`  a chain with elements `e`
@@ -287,7 +287,7 @@ julia> Poset(:partitionsdominance,5)
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L497-L518' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L502-L523' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.CPoset' href='#FinitePosets.CPoset'>#</a>
 **`FinitePosets.CPoset`** &mdash; *Type*.
@@ -304,7 +304,7 @@ julia> CPoset(Bool[1 1 1 1 1;0 1 0 1 1;0 0 1 1 1;0 0 0 1 0;0 0 0 0 1])
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L394-L404' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L399-L409' class='documenter-source'>source</a><br>
 
 
 `CPoset(h::Vector{<:Vector{<:Integer}})`
@@ -317,7 +317,7 @@ julia> CPoset([[2,3],[4,5],[4,5],Int[],Int[]])
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L407-L418' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L412-L423' class='documenter-source'>source</a><br>
 
 
 `CPoset(f::Function,n::integer)`
@@ -333,7 +333,7 @@ julia> CPoset((x,y)->y%x==0,8)  # the divisibility poset
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L436-L447' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L441-L452' class='documenter-source'>source</a><br>
 
 
 `CPoset(covers::Vector{Tuple{Int,Int}})`
@@ -348,7 +348,7 @@ julia> CPoset([(6,2),(5,1)])
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L450-L462' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L455-L467' class='documenter-source'>source</a><br>
 
 
   * `CPoset(:chain,n)`  a chain on `1:n`
@@ -356,7 +356,7 @@ julia> CPoset([(6,2),(5,1)])
   * `CPoset(:diamond,n)`  a diamond poset on `1:n`
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L489-L493' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L494-L498' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.hasse' href='#FinitePosets.hasse'>#</a>
 **`FinitePosets.hasse`** &mdash; *Function*.
@@ -384,7 +384,7 @@ julia> hasse(m)
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L308-L329' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L312-L333' class='documenter-source'>source</a><br>
 
 
 `hasse(P::CPoset)`
@@ -408,7 +408,7 @@ julia> hasse(p)
 `hasse(P::Poset)` returns `hasse(P.C)`.
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L623-L642' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L659-L678' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.incidence' href='#FinitePosets.incidence'>#</a>
 **`FinitePosets.incidence`** &mdash; *Function*.
@@ -436,7 +436,7 @@ julia> incidence(p)
 `incidence(P::Poset)` returns `incidence(P.C)`.
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L649-L668' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L685-L704' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.transitive_closure' href='#FinitePosets.transitive_closure'>#</a>
 **`FinitePosets.transitive_closure`** &mdash; *Function*.
@@ -456,7 +456,7 @@ julia> m=[j-i in [0,1] for i in 1:5, j in 1:5]
  0  0  0  1  1
  0  0  0  0  1
 
-julia>transitive_closure(m)
+julia> transitive_closure(m)
 5×5 Matrix{Bool}:
  1  1  1  1  1
  0  1  1  1  1
@@ -466,7 +466,7 @@ julia>transitive_closure(m)
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L269-L296' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L273-L300' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.linear_extension' href='#FinitePosets.linear_extension'>#</a>
 **`FinitePosets.linear_extension`** &mdash; *Function*.
@@ -497,7 +497,33 @@ julia> linear_extension(p)
 `linear_extension(P::Poset)` returns a linear extension of `P.C`.
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L558-L583' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L563-L588' class='documenter-source'>source</a><br>
+
+<a id='FinitePosets.linear_extensions' href='#FinitePosets.linear_extensions'>#</a>
+**`FinitePosets.linear_extensions`** &mdash; *Function*.
+
+
+
+`linear_extensions(P::CPoset)`
+
+returns all linear extensions of the `CPoset` (see linear_extension)
+
+```julia-repl
+julia> p=CPoset((i,j)->j%i==0,4) # divisibility poset on 1:4
+1<3
+1<2<4
+
+julia> linear_extensions(p)
+3-element Vector{Vector{Int64}}:
+ [1, 2, 3, 4]
+ [1, 2, 4, 3]
+ [1, 3, 2, 4]
+```
+
+`linear_extensions(P::Poset)` returns the linear extensions of `p.C`.
+
+
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L639-L656' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.dual' href='#FinitePosets.dual'>#</a>
 **`FinitePosets.dual`** &mdash; *Function*.
@@ -517,7 +543,7 @@ julia> dual(p)
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L849-L861' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L885-L897' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.partition' href='#FinitePosets.partition'>#</a>
 **`FinitePosets.partition`** &mdash; *Function*.
@@ -543,7 +569,7 @@ julia> partition(p)
 `partition(P::Poset)` returns `partition(P.C)`
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L871-L891' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L907-L927' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.induced' href='#FinitePosets.induced'>#</a>
 **`FinitePosets.induced`** &mdash; *Function*.
@@ -566,7 +592,7 @@ julia> induced(Poset(p),2:6) # elements are kept
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L902-L920' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L938-L956' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.isjoinlattice' href='#FinitePosets.isjoinlattice'>#</a>
 **`FinitePosets.isjoinlattice`** &mdash; *Function*.
@@ -591,7 +617,7 @@ false
 `isjoinlattice(P::Poset)` returns `isjoinlattice(P.C)`
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L966-L983' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1005-L1022' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.ismeetlattice' href='#FinitePosets.ismeetlattice'>#</a>
 **`FinitePosets.ismeetlattice`** &mdash; *Function*.
@@ -616,7 +642,7 @@ true
 `ismeetlattice(P::Poset)` returns `ismeetlattice(P.C)`
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L986-L1003' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1025-L1042' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.maxima' href='#FinitePosets.maxima'>#</a>
 **`FinitePosets.maxima`** &mdash; *Function*.
@@ -624,6 +650,8 @@ true
 
 
 `maxima(P)` the maximal elements of the `Poset` or `CPoset`
+
+`maxima(P,E)` the maximal elements of the subset `E` of elements of `P`
 
 ```julia-repl
 julia> p=CPoset([[3],[3],[4,5],Int[],Int[]])
@@ -633,10 +661,14 @@ julia> maxima(p)
 2-element Vector{Int64}:
  4
  5
+ 
+julia> maxima(p,1:3)
+1-element Vector{Int64}:
+ 3
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1100-L1112' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1147-L1166' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.minima' href='#FinitePosets.minima'>#</a>
 **`FinitePosets.minima`** &mdash; *Function*.
@@ -644,6 +676,8 @@ julia> maxima(p)
 
 
 `minima(P)` the minimal elements of the `Poset` or `CPoset`
+
+`minima(P,E)` the minimal elements of the subset `E` of elements of `P`
 
 ```julia-repl
 julia> p=CPoset([[3],[3],[4,5],Int[],Int[]])
@@ -653,10 +687,14 @@ julia> minima(p)
 2-element Vector{Int64}:
  1
  2
+ 
+julia> minima(p,3:5)
+1-element Vector{Int64}:
+ 3
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1081-L1093' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1120-L1139' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.covering_chains' href='#FinitePosets.covering_chains'>#</a>
 **`FinitePosets.covering_chains`** &mdash; *Function*.
@@ -668,7 +706,7 @@ julia> minima(p)
 A (greedy: the first is longest possible) list of covering chains for P.
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L819-L823' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L855-L859' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.interval' href='#FinitePosets.interval'>#</a>
 **`FinitePosets.interval`** &mdash; *Function*.
@@ -677,7 +715,7 @@ A (greedy: the first is longest possible) list of covering chains for P.
 
 `interval(P,f::Function,a)` `interval(P,f::Function,a,g::Function,b)`
 
-returns  an interval in the `Poset` or  `CPoset` given by `P`. The function `f` must be one of the comparison functions `≤, <, ≥, >`. In the first form it returns the interval between `a` and one end (or the other, depending on the  comparison function). In  the second form  it returns the intersection of the intervals `interval(P,f,a)` and `interval(P,g,b)`.
+returns  an interval in the `Poset` or  `CPoset` given by `P`. The function `f` must be one of the comparison functions `≤, <, ≥, >`. In the first form it returns the interval above `a` or below `a`, depending on the comparison function;  a may be an element  of `P`, or a vector  of elements of `P`; in the  latter case, the order ideal of  elements below (or above) any element of  `a` is returned. In the second  form it returns the intersection of the intervals `interval(P,f,a)` and `interval(P,g,b)`.
 
 ```julia-repl
 julia> l=vec(collect(Iterators.product(1:2,1:2)))
@@ -720,7 +758,7 @@ julia> interval(P.C,>,1,<,4) # in terms of indices
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1123-L1171' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1177-L1227' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.maximal_chains' href='#FinitePosets.maximal_chains'>#</a>
 **`FinitePosets.maximal_chains`** &mdash; *Function*.
@@ -745,7 +783,7 @@ julia> maximal_chains(p.C)
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1192-L1208' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1261-L1277' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.chains' href='#FinitePosets.chains'>#</a>
 **`FinitePosets.chains`** &mdash; *Function*.
@@ -768,7 +806,33 @@ julia> chains(CPoset(:chain,3))
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1231-L1245' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1300-L1314' class='documenter-source'>source</a><br>
+
+<a id='FinitePosets.antichains' href='#FinitePosets.antichains'>#</a>
+**`FinitePosets.antichains`** &mdash; *Function*.
+
+
+
+`antichains(p::CPoset)` computes the antichains of `p`
+
+```julia-repl
+julia> p=CPoset((i,j)->j%i==0,4)
+1<3
+1<2<4
+
+julia> FinitePosets.antichains(p)
+7-element Vector{Vector{Int64}}:
+ []
+ [1]
+ [2]
+ [3]
+ [4]
+ [2, 3]
+ [3, 4]
+```
+
+
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1396-L1414' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.height' href='#FinitePosets.height'>#</a>
 **`FinitePosets.height`** &mdash; *Function*.
@@ -778,7 +842,7 @@ julia> chains(CPoset(:chain,3))
 `height(P)`  the height of the `Poset` or `CPoset` (the longest length of a chain).
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1272-L1275' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1341-L1344' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.chainpoly' href='#FinitePosets.chainpoly'>#</a>
 **`FinitePosets.chainpoly`** &mdash; *Function*.
@@ -798,7 +862,7 @@ julia> chainpoly(Poset(:powerset,3))
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1252-L1264' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1321-L1333' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.ranking' href='#FinitePosets.ranking'>#</a>
 **`FinitePosets.ranking`** &mdash; *Function*.
@@ -835,7 +899,7 @@ julia> ranking(Poset(:partitionsdominance,7)) # not ranked
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1278-L1309' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1347-L1378' class='documenter-source'>source</a><br>
 
 <a id='Combinat.moebius' href='#Combinat.moebius'>#</a>
 **`Combinat.moebius`** &mdash; *Function*.
@@ -846,8 +910,8 @@ julia> ranking(Poset(:partitionsdominance,7)) # not ranked
 
 the vector of values `μ(x,y)` of the Moebius function of `P` for `x` varying. Here is an example giving the ususal Moebius function on integers.
 
-```julia_repl
-julia> p=CPoset((i,j)->i%j==0,1:8)
+```julia-repl
+julia> p=CPoset((i,j)->i%j==0,8)
 5,7<1
 6<2<1
 6<3<1
@@ -866,7 +930,7 @@ julia> moebius(p)
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1006-L1029' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1045-L1068' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.moebiusmatrix' href='#FinitePosets.moebiusmatrix'>#</a>
 **`FinitePosets.moebiusmatrix`** &mdash; *Function*.
@@ -888,7 +952,7 @@ julia> moebiusmatrix(CPoset(:diamond,5))
 `moebiusmatrix(P::Poset)` returns `moebiusmatrix(P.C)`
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L1060-L1074' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L1099-L1113' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.coxetermatrix' href='#FinitePosets.coxetermatrix'>#</a>
 **`FinitePosets.coxetermatrix`** &mdash; *Function*.
@@ -908,7 +972,7 @@ julia> coxetermatrix(CPoset(:diamond,5))
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L804-L816' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L840-L852' class='documenter-source'>source</a><br>
 
 <a id='Base.:+-Tuple{CPoset, CPoset}' href='#Base.:+-Tuple{CPoset, CPoset}'>#</a>
 **`Base.:+`** &mdash; *Method*.
@@ -928,7 +992,7 @@ a<b<c
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L680-L691' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L716-L727' class='documenter-source'>source</a><br>
 
 <a id='Base.:*-Tuple{CPoset, CPoset}' href='#Base.:*-Tuple{CPoset, CPoset}'>#</a>
 **`Base.:*`** &mdash; *Method*.
@@ -950,7 +1014,7 @@ julia> Poset(:chain,[1,2])*Poset(:chain,[:a,:b,:c])
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L712-L725' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L748-L761' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.:⊕' href='#FinitePosets.:⊕'>#</a>
 **`FinitePosets.:⊕`** &mdash; *Function*.
@@ -968,7 +1032,7 @@ julia> Poset(:chain,[1,2])⊕ Poset(:chain,[:a,:b,:c])
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L695-L704' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L731-L740' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.:⊗' href='#FinitePosets.:⊗'>#</a>
 **`FinitePosets.:⊗`** &mdash; *Function*.
@@ -986,7 +1050,7 @@ julia> Poset(:chain,[1,2])⊗ Poset(:chain,[:a,:b,:c])
 ```
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L778-L787' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L814-L823' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.showpic' href='#FinitePosets.showpic'>#</a>
 **`FinitePosets.showpic`** &mdash; *Function*.
@@ -996,7 +1060,7 @@ julia> Poset(:chain,[1,2])⊗ Poset(:chain,[:a,:b,:c])
 `showpic(p;opt...)` display a graphical representation of the Hasse diagram of  the `Poset` or `CPoset` using the  commands `dot` and `open`. If `p isa Poset` it is possible to give as keyword aguments a list of `IO` properties which will be forwarded to the `show_element` method of `p`.
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L750-L755' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L786-L791' class='documenter-source'>source</a><br>
 
 <a id='FinitePosets.dot' href='#FinitePosets.dot'>#</a>
 **`FinitePosets.dot`** &mdash; *Function*.
@@ -1006,5 +1070,5 @@ julia> Poset(:chain,[1,2])⊗ Poset(:chain,[:a,:b,:c])
 `dot(p)` gives a rendering of the Hasse diagram of the `Poset` or `CPoset` in the graphical language `dot`.
 
 
-<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/98807aa78cd5dec5ec912977122e77b341e3607c/src/FinitePosets.jl#L732-L735' class='documenter-source'>source</a><br>
+<a target='_blank' href='https://github.com/jmichel7/FinitePosets.jl/blob/6687afede9a1d5c9f948d09540ab79b3ff37407e/src/FinitePosets.jl#L768-L771' class='documenter-source'>source</a><br>
 

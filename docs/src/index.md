@@ -10,6 +10,7 @@ hasse
 incidence
 transitive_closure
 linear_extension
+linear_extensions
 dual
 partition
 induced
@@ -21,6 +22,7 @@ covering_chains
 interval
 maximal_chains
 chains
+antichains
 height
 chainpoly
 ranking

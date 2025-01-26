@@ -216,7 +216,7 @@ see the on-line help on
 chains,
 chainpoly,
 covering_chains,
-coxetermatrix, 
+coxeter_matrix, 
 dual, 
 hasse, 
 height,
@@ -226,8 +226,10 @@ interval,
 isjoinlattice, 
 ismeetlattice, 
 linear_extension, 
+linear_extensions, 
 maxima,
 maximal_chains, 
+antichains,
 minima,
 moebius, 
 moebiusmatrix, 
@@ -246,7 +248,7 @@ export CPoset, Poset,
 chains,
 chainpoly,
 covering_chains,
-coxetermatrix, 
+coxeter_matrix, 
 dual, 
 hasse, 
 height,
@@ -256,6 +258,7 @@ interval,
 isjoinlattice, 
 ismeetlattice, 
 linear_extension, 
+linear_extensions, 
 maxima,
 maximal_chains, 
 minima,
@@ -264,7 +267,8 @@ partition,
 ranking,
 showpic,
 transitive_closure,
-moebius
+moebius,
+antichains
 
 """
 `transitive_closure(M)`
@@ -285,7 +289,7 @@ julia> m=[j-i in [0,1] for i in 1:5, j in 1:5]
  0  0  0  1  1
  0  0  0  0  1
 
-julia>transitive_closure(m)
+julia> transitive_closure(m)
 5×5 Matrix{Bool}:
  1  1  1  1  1
  0  1  1  1  1
@@ -381,13 +385,14 @@ CPoset(P::Poset)=P.C
 Base.length(P::Poset)=length(P.C)
 chainpoly(P::Poset)=chainpoly(P.C)
 covers(P::Poset)=covers(P.C)
-coxetermatrix(P::Poset)=coxetermatrix(P.C)
+coxeter_matrix(P::Poset)=coxeter_matrix(P.C)
 hasse(P::Poset)=hasse(P.C)
 height(P::Poset)=height(P.C)
 incidence(P::Poset)=incidence(P.C)
 isjoinlattice(P::Poset)=isjoinlattice(P.C)
 ismeetlattice(P::Poset)=ismeetlattice(P.C)
 linear_extension(P::Poset)=linear_extension(P.C)
+linear_extensions(P::Poset)=linear_extensions(P.C)
 moebiusmatrix(P::Poset)=moebiusmatrix(P.C)
 partition(P::Poset)=partition(P.C)
 
@@ -620,6 +625,37 @@ function linear_extension(m::Matrix{Bool})
   res
 end
 
+function linear_extensions(m::Matrix{Bool},E=axes(m,1))
+  if length(E)==1 return [E] end
+  res=Vector{Int}[]
+  for i in findall(i->count(@view m[E,i])==1,E)
+    for x in linear_extensions(m,deleteat!(collect(E),i))
+      push!(res,pushfirst!(x,E[i]))
+    end
+  end
+  res
+end
+
+"""
+`linear_extensions(P::CPoset)`
+
+returns all linear extensions of the `CPoset` (see linear_extension)
+
+```julia-repl
+julia> p=CPoset((i,j)->j%i==0,4) # divisibility poset on 1:4
+1<3
+1<2<4
+
+julia> linear_extensions(p)
+3-element Vector{Vector{Int64}}:
+ [1, 2, 3, 4]
+ [1, 2, 4, 3]
+ [1, 3, 2, 4]
+```
+`linear_extensions(P::Poset)` returns the linear extensions of `p.C`.
+"""
+linear_extensions(P::CPoset)=linear_extensions(incidence(P))
+
 """
 `hasse(P::CPoset)`
 
@@ -802,10 +838,10 @@ end
               vec(collect(Iterators.product(P.elements,Q.elements))))
 
 """
-`coxetermatrix(p)` the Coxeter matrix of the `Poset` or `CPoset`, defined
+`coxeter_matrix(p)` the Coxeter matrix of the `Poset` or `CPoset`, defined
 as `-m*transpose(inv(m))` where `m` is the ζ or incidence matrix.
 ```julia-repl
-julia> coxetermatrix(CPoset(:diamond,5))
+julia> coxeter_matrix(CPoset(:diamond,5))
 5×5 Matrix{Int64}:
   0  -1  -1  -1  -2
   0   0   1   1   1
@@ -814,7 +850,7 @@ julia> coxetermatrix(CPoset(:diamond,5))
  -1  -1  -1  -1  -1
 ```
 """
-coxetermatrix(p::CPoset)=-moebiusmatrix(p)*transpose(incidence(p))
+coxeter_matrix(p::CPoset,o=linear_extension(p))=-moebiusmatrix(p,o)*transpose(incidence(p))
 
 """
 `covering_chains(P::CPoset)`
@@ -935,8 +971,11 @@ function induced(p::CPoset,ind::AbstractVector{<:Integer})
   res
 end
 
+index(p::Poset{T},x::T) where T=findfirst(==(x),p.elements)
+index(p::Poset{T},x::AbstractVector{<:T}) where T=Int.(indexin(x,p.elements))
+
 function induced(p::Poset{T},S::AbstractVector{T})where T
-  ind=Int.(indexin(S,p.elements))
+  ind=index(p,S)
   Poset(induced(p.C,ind),p.elements[ind])
 end
 
@@ -1008,8 +1047,8 @@ ismeetlattice(P::CPoset)=checkl(transpose(incidence(P)))
 
 the vector of values `μ(x,y)` of the Moebius function of `P` for `x` varying.
 Here is an example giving the ususal Moebius function on integers.
-```julia_repl
-julia> p=CPoset((i,j)->i%j==0,1:8)
+```julia-repl
+julia> p=CPoset((i,j)->i%j==0,8)
 5,7<1
 6<2<1
 6<3<1
@@ -1049,7 +1088,8 @@ function Combinat.moebius(P::CPoset,y::Integer=0)
 end
 Combinat.moebius(P::Poset,y=0)=moebius(P.C,y)
 
-function unitriangularinv(b::Matrix)
+# inverse of upper unitriangular matrix
+function invUnitUpperTriangular(b::Matrix)
   a=Int.(b)
   for k in axes(b,1), i in k+1:size(b,1) 
     a[k,i]=-b[k,i]-sum(j->b[j,i]*a[k,j],k+1:i-1;init=0)
@@ -1071,9 +1111,8 @@ julia> moebiusmatrix(CPoset(:diamond,5))
 ```
 `moebiusmatrix(P::Poset)` returns `moebiusmatrix(P.C)`
 "
-function moebiusmatrix(P::CPoset)
-  o=linear_extension(P)
-  r=unitriangularinv(incidence(P)[o,o])
+function moebiusmatrix(P::CPoset,o=linear_extension(P))
+  r=invUnitUpperTriangular(incidence(P)[o,o])
   o=invperm(o)
   r[o,o]
 end
@@ -1081,6 +1120,9 @@ end
 """
 `minima(P)`
 the minimal elements of the `Poset` or `CPoset`
+
+`minima(P,E)`
+the minimal elements of the subset `E` of elements of `P`
 ```julia-repl
 julia> p=CPoset([[3],[3],[4,5],Int[],Int[]])
 1,2<3<4,5
@@ -1089,17 +1131,25 @@ julia> minima(p)
 2-element Vector{Int64}:
  1
  2
+ 
+julia> minima(p,3:5)
+1-element Vector{Int64}:
+ 3
 ```
 """
-function minima(p::CPoset)
+function minima(p::CPoset,E=1:length(p))
   m=incidence(p)
-  findall(i->count(@view m[:,i])==1,1:length(p))
+  E[findall(i->count(@view m[E,i])==1,E)]
 end
 minima(p::Poset)=p.elements[minima(p.C)]
+minima(p::Poset,E)=p.elements[minima(p.C,index(p,E))]
 
 """
 `maxima(P)`
 the maximal elements of the `Poset` or `CPoset`
+
+`maxima(P,E)`
+the maximal elements of the subset `E` of elements of `P`
 ```julia-repl
 julia> p=CPoset([[3],[3],[4,5],Int[],Int[]])
 1,2<3<4,5
@@ -1108,15 +1158,19 @@ julia> maxima(p)
 2-element Vector{Int64}:
  4
  5
+ 
+julia> maxima(p,1:3)
+1-element Vector{Int64}:
+ 3
 ```
 """
-function maxima(p::CPoset)
+function maxima(p::CPoset,E=1:length(p))
   m=incidence(p)
-  findall(i->count(@view m[i,:])==1,1:length(p))
+  E[findall(i->count(@view m[i,E])==1,E)]
 end
 maxima(p::Poset)=p.elements[maxima(p.C)]
+maxima(p::Poset,E)=p.elements[maxima(p.C,index(p,E))]
 
-index(p::Poset{T},x::T) where T=findfirst(==(x),p.elements)
 Base.:≤(p::CPoset,a,b)=incidence(p)[a,b]
 Base.:≤(p::Poset,a,b)=≤(p.C,index(p,a),index(p,b))
 
@@ -1126,9 +1180,11 @@ Base.:≤(p::Poset,a,b)=≤(p.C,index(p,a),index(p,b))
 
 returns  an interval in the `Poset` or  `CPoset` given by `P`. The function
 `f` must be one of the comparison functions `≤, <, ≥, >`. In the first form
-it returns the interval between `a` and one end (or the other, depending on
-the  comparison function). In  the second form  it returns the
-intersection of the intervals `interval(P,f,a)` and `interval(P,g,b)`.
+it returns the interval above `a` or below `a`, depending on the comparison
+function;  a may be an element  of `P`, or a vector  of elements of `P`; in
+the  latter case, the order ideal of  elements below (or above) any element
+of  `a` is returned. In the second  form it returns the intersection of the
+intervals `interval(P,f,a)` and `interval(P,g,b)`.
 ```julia-repl
 julia> l=vec(collect(Iterators.product(1:2,1:2)))
 4-element Vector{Tuple{Int64, Int64}}:
@@ -1171,14 +1227,27 @@ julia> interval(P.C,>,1,<,4) # in terms of indices
 """
 function interval(p::CPoset,f::Function,i)
   s=Symbol(f)
+  m=incidence(p)
   if s==:<=  
-    (1:length(p))[incidence(p)[:,i]]
+    if i isa AbstractVector 
+         [j for j in 1:length(p) if any(m[j,i])]
+    else (1:length(p))[m[:,i]]
+    end
   elseif s==:< 
-    [j for j in 1:length(p) if incidence(p)[j,i] && i!=j]
+    if i isa AbstractVector 
+         [j for j in 1:length(p) if any(m[j,i]) && !(j in i)]
+    else [j for j in 1:length(p) if m[j,i] && i!=j]
+    end
   elseif s==:>= 
-    (1:length(p))[incidence(p)[i,:]]
+    if i isa AbstractVector 
+         [j for j in 1:length(p) if any(m[i,j])]
+    else (1:length(p))[m[i,:]]
+    end
   elseif s==:> 
-    [j for j in 1:length(p) if incidence(p)[i,j] && i!=j]
+    if i isa AbstractVector 
+         [j for j in 1:length(p) if any(m[i,j]) && !(j in i)]
+    else [j for j in 1:length(p) if m[i,j] && i!=j]
+    end
   else error(s," unknown")
   end
 end
@@ -1323,4 +1392,40 @@ function ranking(P::CPoset)
 end
 
 ranking(P::Poset)=ranking(P.C)
+
+"""
+`antichains(p::CPoset)`
+computes the antichains of `p`
+```julia-repl
+julia> p=CPoset((i,j)->j%i==0,4)
+1<3
+1<2<4
+
+julia> FinitePosets.antichains(p)
+7-element Vector{Vector{Int64}}:
+ []
+ [1]
+ [2]
+ [3]
+ [4]
+ [2, 3]
+ [3, 4]
+```
+"""
+function antichains(p::CPoset)
+  m=incidence(p)
+  res=[Int[]]
+  append!(res,map(i->[i],1:length(p)))
+  i=2
+  while i<=length(res)
+    for j in res[i][end]+1:length(p)
+      if !any(@view m[j,res[i]]) && !any(@view m[res[i],j])
+        push!(res,vcat(res[i],j))
+      end
+    end
+    i+=1
+  end
+  res
+end
+
 end
