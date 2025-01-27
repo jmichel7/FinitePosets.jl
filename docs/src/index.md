@@ -11,11 +11,14 @@ incidence
 transitive_closure
 linear_extension
 linear_extensions
+nlinear_extensions
+rand_linear_extension
+is_linear_extension
 dual
 partition
 induced
-isjoinlattice
-ismeetlattice
+is_join_semilattice
+is_meet_semilattice
 maxima
 minima
 covering_chains
@@ -27,8 +30,8 @@ height
 chainpoly
 ranking
 moebius
-moebiusmatrix
-coxetermatrix
+moebius_matrix
+coxeter_matrix
 Base.:+(::CPoset,::CPoset)
 Base.:*(::CPoset,::CPoset)
 ⊕ 

@@ -27,8 +27,8 @@ julia> p=CPoset([[2,3],[4],[4],Int[]])
 1<2,3<4
 ```
 As  seen above,  `p` is  displayed as  a list  of covering  maximal chains;
-elements  which are equivalent for the poset are printed together separated
-by commas.
+elements  which are equivalent for the poset (have the same cover and cover
+the same elements) are printed together separated by commas.
 
 ```julia-repl
 julia> length(p) # the number of elements of `p`
@@ -119,8 +119,8 @@ julia> CPoset([(1,3),(2,5)]) # the CPoset is on 1:maximum(entries)
 1<3
 2<5
 ```
-To get the order relation `≤` of the poset `p` between elements
-`i` and `j` just call `≤(p,i,j)`. 
+To get the order relation `≤` or `<` of the poset `p` between elements
+`i` and `j` just call `≤(p,i,j)` or `<(p,i,j)`. 
 ```julia-repl
 julia> ≤(P,(1,1),(2,1))
 true
@@ -169,7 +169,7 @@ julia> maximal_chains(P)
 julia> height(P) # the length of a maximal chain
 3
 
-julia> moebiusmatrix(P)
+julia> moebius_matrix(P)
 4×4 Matrix{Int64}:
  1  -1  -1   1
  0   1   0  -1
@@ -223,16 +223,19 @@ height,
 incidence, 
 induced, 
 interval, 
-isjoinlattice, 
-ismeetlattice, 
+is_join_semilattice, 
+is_meet_semilattice, 
 linear_extension, 
 linear_extensions, 
+nlinear_extensions, 
+rand_linear_extension, 
+is_linear_extension, 
 maxima,
 maximal_chains, 
 antichains,
 minima,
 moebius, 
-moebiusmatrix, 
+moebius_matrix, 
 partition, 
 showpic,
 transitive_closure`
@@ -255,14 +258,17 @@ height,
 incidence, 
 induced, 
 interval, 
-isjoinlattice, 
-ismeetlattice, 
+is_join_semilattice, 
+is_meet_semilattice, 
 linear_extension, 
 linear_extensions, 
+nlinear_extensions, 
+rand_linear_extension, 
+is_linear_extension, 
 maxima,
 maximal_chains, 
 minima,
-moebiusmatrix, 
+moebius_matrix, 
 partition, 
 ranking,
 showpic,
@@ -389,11 +395,13 @@ coxeter_matrix(P::Poset)=coxeter_matrix(P.C)
 hasse(P::Poset)=hasse(P.C)
 height(P::Poset)=height(P.C)
 incidence(P::Poset)=incidence(P.C)
-isjoinlattice(P::Poset)=isjoinlattice(P.C)
-ismeetlattice(P::Poset)=ismeetlattice(P.C)
+is_join_semilattice(P::Poset)=is_join_semilattice(P.C)
+is_meet_semilattice(P::Poset)=is_meet_semilattice(P.C)
 linear_extension(P::Poset)=linear_extension(P.C)
 linear_extensions(P::Poset)=linear_extensions(P.C)
-moebiusmatrix(P::Poset)=moebiusmatrix(P.C)
+nlinear_extensions(P::Poset)=nlinear_extensions(P.C) 
+rand_linear_extension(P::Poset)=rand_linear_extension(P.C)
+moebius_matrix(P::Poset)=moebius_matrix(P.C)
 partition(P::Poset)=partition(P.C)
 
 """
@@ -495,6 +503,7 @@ end
   - `CPoset(:chain,n)`  a chain on `1:n`
   - `CPoset(:antichain,n)`  an antichain on `1:n`
   - `CPoset(:diamond,n)`  a diamond poset on `1:n`
+  - `CPoset(:pentagon)`  the pentagon poset
 """
 CPoset(s::Symbol,arg...)=CPoset(Val(s),arg...)
 Poset(s::Symbol,arg...)=Poset(Val(s),arg...)
@@ -531,6 +540,7 @@ function CPoset(::Val{:diamond},n::Int)
   h=[[n] for i in 1:n]; h[n]=Int[]; h[1]=2:n-1
   CPoset(h)
 end
+CPoset(::Val{:pentagon})=CPoset([[2,3],[5],[4],[5],Int[]])
 
 function Base.show(io::IO,x::AbstractPoset)
   s=hasse(x)
@@ -636,6 +646,12 @@ function rand_linear_extension(m::Matrix{Bool})
   res
 end
 
+"""
+`rand_linear_extension(P)`  where `P` is a `Poset` or a `CPoset` returns a
+random linear extension of `P`.
+""" 
+rand_linear_extension(P::AbstractPoset)=rand_linear_extension(incidence(P))
+
 function linear_extensions(m::Matrix{Bool},E=trues(size(m,1)),res=[Int.(E)],c=size(m,1))
   first=true
   for i in axes(m,1)
@@ -652,7 +668,7 @@ function linear_extensions(m::Matrix{Bool},E=trues(size(m,1)),res=[Int.(E)],c=si
   res
 end
 
-function nlinear_extensions(m::Matrix{Bool},E=trues(size(m,1)),c=size(m,1))
+function nlinear_extensions(m::Matrix{Bool},E=trues(size(m,1)),c=size(m,1);lim=10^7)
   if c==1 return 1 end
   first=true
   res=0
@@ -663,10 +679,22 @@ function nlinear_extensions(m::Matrix{Bool},E=trues(size(m,1)),c=size(m,1))
     E[i]=false
     res+=nlinear_extensions(m,E,c-1)
     E[i]=true
-    if res>10^7 error("poset has more than 10 million linear extensions") end
+    if res>lim error("poset has more than $lim linear extensions") end
   end
   res
 end
+
+"""
+`nlinear_extensions(P;lim=10^7)`  where  `P`  is  a  `Poset`  or a `CPoset`
+returns  the number of linear extensions of  `P`. It gives an error if this
+number  is `>lim` (the default of 10^7 is attained in a few seconds).
+```julia-repl
+julia> nlinear_extensions(CPoset(:antichain,10))
+3628800
+```
+""" 
+nlinear_extensions(P::AbstractPoset;lim=10^7)=nlinear_extensions(incidence(P);lim)
+
 """
 `linear_extensions(P::CPoset)`
 
@@ -686,6 +714,15 @@ julia> linear_extensions(p)
 `linear_extensions(P::Poset)` returns the linear extensions of `p.C`.
 """
 linear_extensions(P::CPoset)=linear_extensions(incidence(P))
+
+"""
+`is_linear_extension(P,l)` whether `l` is a linear extension of the `Poset` or
+`CPoset` `P`.
+"""
+function is_linear_extension(P::AbstractPoset,l)
+  m=incidence(p)
+  all(i->all(j->!m[i,j] || findfirst(==(i),l)<=findfirst(==(j),l),axes(m,1)),axes(m,1))
+end
 
 """
 `hasse(P::CPoset)`
@@ -870,18 +907,18 @@ end
 
 """
 `coxeter_matrix(p)` the Coxeter matrix of the `Poset` or `CPoset`, defined
-as `-inv(m)*transpose(m)` where `m` is the ζ or incidence matrix.
+as `-m*transpose(inv(m))` where `m` is the ζ or incidence matrix.
 ```julia-repl
 julia> coxeter_matrix(CPoset(:diamond,5))
 5×5 Matrix{Int64}:
-  0  -1  -1  -1  -2
-  0   0   1   1   1
-  0   1   0   1   1
-  0   1   1   0   1
- -1  -1  -1  -1  -1
+  0  0  0  0  -1
+ -1  0  1  1  -1
+ -1  1  0  1  -1
+ -1  1  1  0  -1
+ -2  1  1  1  -1
 ```
 """
-coxeter_matrix(p::CPoset)=-moebiusmatrix(p)*transpose(incidence(p))
+coxeter_matrix(p::CPoset)=-incidence(p)*transpose(moebius_matrix(p))
 
 """
 `covering_chains(P::CPoset)`
@@ -1034,11 +1071,10 @@ function checkl(ord::AbstractMatrix{Bool})
 end
 
 """
-`isjoinlattice(P::CPoset)`
+`is_join_semilattice(P::CPoset)` where `P` is a `Poset` or `CPoset`
 
-returns  `true` if `P` is  a join semilattice, that  is any two elements of
+returns  `true` iff `P` is a join  semilattice, that is any two elements of
 `P` have a unique smallest upper bound; returns `false` otherwise.
-
 ```julia-repl
 julia> p=CPoset((i,j)->j%i==0,8)
 1<5,7
@@ -1046,19 +1082,17 @@ julia> p=CPoset((i,j)->j%i==0,8)
 1<3<6
 2<6
 
-julia> isjoinlattice(p)
+julia> is_join_semilattice(p)
 false
 ```
-`isjoinlattice(P::Poset)` returns `isjoinlattice(P.C)`
 """
-isjoinlattice(P::CPoset)=checkl(incidence(P))
+is_join_semilattice(P::CPoset)=checkl(incidence(P))
 
 """
-`ismeetlattice(P)`
+`is_meet_semilattice(P)` where `P` is a `Poset` or `CPoset`
 
-returns  `true` if `P` is  a meet semilattice, that  is any two elements of
+returns  `true` iff `P` is a meet  semilattice, that is any two elements of
 `P` have a unique highest lower bound; returns `false` otherwise.
-
 ```julia-repl
 julia> p=CPoset((i,j)->j%i==0,8)
 1<5,7
@@ -1066,12 +1100,11 @@ julia> p=CPoset((i,j)->j%i==0,8)
 1<3<6
 2<6
 
-julia> ismeetlattice(p)
+julia> is_meet_semilattice(p)
 true
 ```
-`ismeetlattice(P::Poset)` returns `ismeetlattice(P.C)`
 """
-ismeetlattice(P::CPoset)=checkl(transpose(incidence(P)))
+is_meet_semilattice(P::CPoset)=checkl(transpose(incidence(P)))
 
 """
 `moebius(P::CPoset,y=first(maxima(P)))`
@@ -1128,11 +1161,11 @@ function invUnitUpperTriangular(b::Matrix)
   a
 end
 
-"`moebiusmatrix(P::CPoset)` 
+"`moebius_matrix(P::CPoset)` 
 the  matrix  of  the  Moebius  function  `μ(x,y)`  (the inverse of the ζ or
 incidence matrix)
 ```julia-repl
-julia> moebiusmatrix(CPoset(:diamond,5))
+julia> moebius_matrix(CPoset(:diamond,5))
 5×5 Matrix{Int64}:
  1  -1  -1  -1   2
  0   1   0   0  -1
@@ -1140,9 +1173,9 @@ julia> moebiusmatrix(CPoset(:diamond,5))
  0   0   0   1  -1
  0   0   0   0   1
 ```
-`moebiusmatrix(P::Poset)` returns `moebiusmatrix(P.C)`
+`moebius_matrix(P::Poset)` returns `moebius_matrix(P.C)`
 "
-function moebiusmatrix(P::CPoset)
+function moebius_matrix(P::CPoset)
   o=linear_extension(P)
   r=invUnitUpperTriangular(incidence(P)[o,o])
   o=invperm(o)
@@ -1205,6 +1238,8 @@ maxima(p::Poset,E)=p.elements[maxima(p.C,index(p,E))]
 
 Base.:≤(p::CPoset,a,b)=incidence(p)[a,b]
 Base.:≤(p::Poset,a,b)=≤(p.C,index(p,a),index(p,b))
+Base.:<(p::CPoset,a,b)=incidence(p)[a,b] && a!=b
+Base.:<(p::Poset,a,b)=<(p.C,index(p,a),index(p,b)) && a!=b
 
 """
 `interval(P,f::Function,a)`
@@ -1213,7 +1248,7 @@ Base.:≤(p::Poset,a,b)=≤(p.C,index(p,a),index(p,b))
 returns  an interval in the `Poset` or  `CPoset` given by `P`. The function
 `f` must be one of the comparison functions `≤, <, ≥, >`. In the first form
 it returns the interval above `a` or below `a`, depending on the comparison
-function;  a may be an element  of `P`, or a vector  of elements of `P`; in
+function;  `a` may be an element of `P`, or a vector of elements of `P`; in
 the  latter case, the order ideal of  elements below (or above) any element
 of  `a` is returned. In the second  form it returns the intersection of the
 intervals `interval(P,f,a)` and `interval(P,g,b)`.
